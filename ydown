@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Function to download the video/audio
+download() {
+    # Change to yt-dlp directory, update, and return to previous directory    
+    cd c0de/tools/yt-dlp && git pull || { echo "Failed to update yt-dlp"; exit 1; }
+    cd ../
+
+    # Update ffmpeg package
+    #pkg upgrade ffmpeg -y || { echo "Failed to upgrade ffmpeg"; exit 1; }
+    cd ../../
+
+    # Run yt-dlp command with provided URL and format
+    ./c0de/tools/yt-dlp/yt-dlp.sh $2 --embed-thumbnail -o "%(title)s.%(ext)s" $1 || {
+        echo "Failed to download video"; exit 1;
+    }
+}
+
+rename() {
+    # Rename file to replace spaces with underscores
+    for file in *.mp3 *.mp4; do
+        if [ -e "$file" ]; then
+            mv "$file" "$(echo "$file" | tr ' ' '_')"
+        fi
+    done
+}
+
+# Check if URL is provided as the first argument
+if [ -z "$1" ]; then
+    # Prompt user to enter URL if none is provided
+    read -p "Enter URL: " url
+else
+    url="$1"
+fi
+
+# Check if format is provided as the second argument
+if [ -z "$2" ]; then
+    # Prompt for format if not provided as argument
+    read -p "Format: mp3 (type 3) or mp4 (type 4): " user_format
+else
+    user_format="$2"
+fi
+
+# Determine format based on user input or argument
+if [ "$user_format" == "mp3" ] || [ "$user_format" == "3" ]; then
+    format="-x --audio-format mp3"
+elif [ "$user_format" == "mp4" ] || [ "$user_format" == "4" ]; then
+    format="-f mp4"
+else
+    echo "Invalid format"
+    exit 1
+fi
+
+# Start the download process with provided URL and format
+download "$url" "$format"
+rename
