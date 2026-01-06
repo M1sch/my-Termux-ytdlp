@@ -1,14 +1,13 @@
 #!/bin/bash
 
+ytdlppath = c0de/tools/yt-dlp
+
+
 # Function to download the video/audio
 download() {
     # Change to yt-dlp directory, update, and return to previous directory    
     cd c0de/tools/yt-dlp && git pull || { echo "Failed to update yt-dlp"; exit 1; }
-    cd ../
-
-    # Update ffmpeg package
-    #pkg upgrade ffmpeg -y || { echo "Failed to upgrade ffmpeg"; exit 1; }
-    cd ../../
+    cd ../../../
 
     # Run yt-dlp command with provided URL and format
     ./c0de/tools/yt-dlp/yt-dlp.sh $2 --embed-thumbnail -o "%(title)s.%(ext)s" $1 || {
@@ -16,8 +15,8 @@ download() {
     }
 }
 
+# Rename file to replace spaces with underscores
 rename() {
-    # Rename file to replace spaces with underscores
     for file in *.mp3 *.mp4; do
         if [ -e "$file" ]; then
             mv "$file" "$(echo "$file" | tr ' ' '_')"
